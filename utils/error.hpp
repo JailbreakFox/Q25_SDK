@@ -34,20 +34,20 @@ public:
 };
 
 /**
- * 导航异常
+ * 建图与定位异常
  */
-class NavigationException : public SDKException {
+class MappingException : public SDKException {
 public:
-    NavigationException(ErrorCode code, const std::string& message)
+    MappingException(ErrorCode code, const std::string& message)
         : SDKException(code, message) {}
 };
 
 /**
- * 超时异常
+ * 运动异常
  */
-class TimeoutException : public SDKException {
+class MotionException : public SDKException {
 public:
-    explicit TimeoutException(const std::string& message)
+    explicit MotionException(const std::string& message)
         : SDKException(ErrorCode::TIMEOUT, message) {}
 };
 
