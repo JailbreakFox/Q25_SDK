@@ -12,25 +12,16 @@
  */
 
 // 核心模块 Core
-#include "core/types.hpp"
-#include "core/robot.hpp"
+#include "core/types.hpp"            // 类型定义
+#include "core/robot.hpp"            // 连接管理
 
 // 运动控制 Motion Control
 #include "motion/motion_control.hpp"
 #include "motion/motion_state.hpp"
 
-// 导航 Navigation
-#include "navigation/point_navigation.hpp"
-#include "navigation/track_navigation.hpp"
-
 // 建图与定位 Mapping & Localization
 #include "mapping/slam.hpp"
 #include "mapping/map_manager.hpp"
-
-// 传感器 Sensors
-#include "sensor/imu.hpp"
-#include "sensor/lidar.hpp"
-#include "sensor/battery.hpp"
 
 // 工具 Utilities
 #include "utils/error.hpp"

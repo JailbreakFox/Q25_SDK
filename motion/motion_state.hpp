@@ -11,7 +11,7 @@ namespace sdk {
  * 运动状态信息
  */
 struct MotionState {
-    RobotBasicState basic_state;  // 基本状态
+    RobotBasicState basic_state;   // 基本状态
     MotionMode motion_mode;        // 运动模式
     GaitType gait;                 // 步态
     SpeedLevel speed_level;        // 速度档位
