@@ -7,6 +7,9 @@
 namespace robot {
 namespace q25 {
 
+// 前向声明
+class RobotImpl;
+
 /**
  * Robot - 机器人SDK入口类
  * 提供连接管理和各功能模块的访问接口
@@ -41,6 +44,8 @@ public:
     bool isConnected() const;
 
 private:
+    std::unique_ptr<RobotImpl> pImpl;
+    
     // 禁用拷贝
     Robot(const Robot&) = delete;
     Robot& operator=(const Robot&) = delete;

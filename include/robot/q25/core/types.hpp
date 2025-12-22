@@ -32,6 +32,13 @@ struct Pose {
     Quaternion orientation;
 };
 
+// 速度信息
+struct Velocity {
+    float linear_x;   // 线速度 x (m/s)
+    float linear_y;   // 线速度 y (m/s)
+    float angular_z;  // 角速度 z (rad/s)
+};
+
 // 轴类型 (对应摇杆轴)
 enum class AxisType {
     LEFT_Y = 0,     // 左摇杆Y轴 (前后) 死区: ±6553
