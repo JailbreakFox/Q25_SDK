@@ -4,8 +4,8 @@
 #include "../core/types.hpp"
 #include <string>
 
-namespace quadruped {
-namespace sdk {
+namespace robot {
+namespace q25 {
 
 /**
  * 运动状态信息
@@ -75,7 +75,7 @@ public:
     virtual bool isEmergencyStopped() const = 0;
 };
 
-} // namespace sdk
-} // namespace quadruped
+} // namespace q25
+} // namespace robot
 
 #endif // QUADRUPED_SDK_MOTION_STATE_HPP

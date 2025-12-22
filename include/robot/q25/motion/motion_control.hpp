@@ -3,8 +3,8 @@
 
 #include "../core/types.hpp"
 
-namespace quadruped {
-namespace sdk {
+namespace robot {
+namespace q25 {
 
 /**
  * MotionController - 运动控制接口
@@ -60,18 +60,31 @@ public:
      */
     virtual MotionMode getMotionMode() const = 0;
 
-    // ============ 速度控制 (手动模式) ============
+    // ============ 轴控制 (底层接口) ============
 
     /**
-     * 发送速度控制指令
-     * @param velocity 速度指令
+     * 设置轴值
+     * @param axis 轴类型 (LEFT_Y/LEFT_X/RIGHT_X)
+     * @param value 轴值 (int32_t，需超出死区才生效)
+     * @note 死区: LEFT_Y=±6553, LEFT_X=±24576, RIGHT_X=±28212
+     * @note 对应UDP命令码:
+     *       - LEFT_Y: 0x21010130 (前后)
+     *       - LEFT_X: 0x21010131 (左右)
+     *       - RIGHT_X: 0x21010135 (旋转)
      */
-    virtual bool setVelocity(const Velocity& velocity) = 0;
+    virtual bool setAxisValue(AxisType axis, int32_t value) = 0;
 
     /**
-     * 停止运动 (速度设为0)
+     * 获取轴死区值
+     * @param axis 轴类型
+     * @return 死区阈值 (正值)
      */
-    virtual bool stop() = 0;
+    virtual int32_t getAxisDeadzone(AxisType axis) const = 0;
+
+    /**
+     * 停止所有轴 (将所有轴值设为0)
+     */
+    virtual bool stopAllAxes() = 0;
 
     // ============ 步态控制 ============
 
@@ -133,7 +146,7 @@ public:
     virtual bool setMaxAngularVelocity(float max_angular_velocity) = 0;
 };
 
-} // namespace sdk
-} // namespace quadruped
+} // namespace q25
+} // namespace robot
 
 #endif // QUADRUPED_SDK_MOTION_CONTROL_HPP

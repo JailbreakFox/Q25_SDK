@@ -5,8 +5,8 @@
 #include <string>
 #include <exception>
 
-namespace quadruped {
-namespace sdk {
+namespace robot {
+namespace q25 {
 
 /**
  * SDK异常基类
@@ -92,7 +92,7 @@ public:
     static std::string getErrorString(ErrorCode code);
 };
 
-} // namespace sdk
-} // namespace quadruped
+} // namespace q25
+} // namespace robot
 
 #endif // QUADRUPED_SDK_UTILS_ERROR_HPP

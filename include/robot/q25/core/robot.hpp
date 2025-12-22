@@ -4,8 +4,8 @@
 #include <string>
 #include <memory>
 
-namespace quadruped {
-namespace sdk {
+namespace robot {
+namespace q25 {
 
 /**
  * Robot - 机器人SDK入口类
@@ -46,7 +46,7 @@ private:
     Robot& operator=(const Robot&) = delete;
 };
 
-} // namespace sdk
-} // namespace quadruped
+} // namespace q25
+} // namespace robot
 
 #endif // QUADRUPED_SDK_CORE_ROBOT_HPP

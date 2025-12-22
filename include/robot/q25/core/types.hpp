@@ -5,8 +5,8 @@
 #include <string>
 #include <vector>
 
-namespace quadruped {
-namespace sdk {
+namespace robot {
+namespace q25 {
 
 // 基础数据类型
 struct Point2D {
@@ -32,11 +32,27 @@ struct Pose {
     Quaternion orientation;
 };
 
-// 速度信息
-struct Velocity {
-    float linear_x;   // m/s
-    float linear_y;   // m/s
-    float angular_z;  // rad/s
+// 轴类型 (对应摇杆轴)
+enum class AxisType {
+    LEFT_Y = 0,     // 左摇杆Y轴 (前后) 死区: ±6553
+    LEFT_X = 1,     // 左摇杆X轴 (左右) 死区: ±24576
+    RIGHT_X = 2     // 右摇杆X轴 (旋转) 死区: ±28212
+};
+
+// 关节ID枚举 (Q25 12关节)
+enum class JointId {
+    FL_HIP_X = 0,   // 左前侧摆
+    FL_HIP_Y = 1,   // 左前髋
+    FL_KNEE = 2,    // 左前膝
+    FR_HIP_X = 3,   // 右前侧摆
+    FR_HIP_Y = 4,   // 右前髋
+    FR_KNEE = 5,    // 右前膝
+    HL_HIP_X = 6,   // 左后侧摆
+    HL_HIP_Y = 7,   // 左后髋
+    HL_KNEE = 8,    // 左后膝
+    HR_HIP_X = 9,   // 右后侧摆
+    HR_HIP_Y = 10,  // 右后髋
+    HR_KNEE = 11    // 右后膝
 };
 
 // 场景信息
@@ -136,7 +152,7 @@ struct BatteryState {
     bool is_charging;
 };
 
-} // namespace sdk
-} // namespace quadruped
+} // namespace q25
+} // namespace robot
 
 #endif // QUADRUPED_SDK_CORE_TYPES_HPP

@@ -5,8 +5,8 @@
 #include <string>
 #include <vector>
 
-namespace quadruped {
-namespace sdk {
+namespace robot {
+namespace q25 {
 
 /**
  * 地图元数据
@@ -122,7 +122,7 @@ public:
     virtual bool sceneExists(uint32_t scene_id) const = 0;
 };
 
-} // namespace sdk
-} // namespace quadruped
+} // namespace q25
+} // namespace robot
 
 #endif // QUADRUPED_SDK_MAPPING_MAP_MANAGER_HPP

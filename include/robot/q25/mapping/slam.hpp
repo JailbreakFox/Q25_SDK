@@ -4,8 +4,8 @@
 #include "../core/types.hpp"
 #include <string>
 
-namespace quadruped {
-namespace sdk {
+namespace robot {
+namespace q25 {
 
 /**
  * 建图状态
@@ -43,43 +43,24 @@ public:
 
     virtual ~SLAM() = default;
 
-    // ============ 建图控制 ============
+    // ============ 建图任务下发功能 ============
 
     /**
      * 开始建图
      * @param scene_name 场景名称
-     * @return true表示建图任务启动成功
      */
-    virtual bool startMapping(const std::string& scene_name) = 0;
-
-    /**
-     * 暂停建图
-     * @return true表示暂停成功
-     */
-    virtual bool pauseMapping() = 0;
-
-    /**
-     * 恢复建图
-     * @return true表示恢复成功
-     */
-    virtual bool resumeMapping() = 0;
+    virtual void startMapping(const std::string& scene_name) = 0;
 
     /**
      * 停止建图并保存
-     * @return true表示保存成功，返回场景ID
+     * @param scene_name 场景名称(要与开始建图的场景名称一致)
      */
-    virtual uint32_t stopMappingAndSave() = 0;
+    virtual void stopMappingAndSave(const std::string& scene_name) = 0;
+
+    // ============ 建图结果读取功能 ============
 
     /**
-     * 取消建图 (不保存)
-     * @return true表示取消成功
-     */
-    virtual bool cancelMapping() = 0;
-
-    // ============ 建图状态 ============
-
-    /**
-     * 获取建图状态
+     * 获取建图状态(1.4.2.6)
      * @return 建图状态
      */
     virtual MappingStatus getMappingStatus() const = 0;
@@ -91,7 +72,7 @@ public:
     virtual MappingStatistics getMappingStatistics() const = 0;
 
     /**
-     * 检查是否正在建图
+     * 检查是否正在建图(1.4.2.6)
      * @return true表示正在建图
      */
     virtual bool isMapping() const = 0;
@@ -124,7 +105,7 @@ public:
     virtual bool isLocalized() const = 0;
 };
 
-} // namespace sdk
-} // namespace quadruped
+} // namespace q25
+} // namespace robot
 
 #endif // QUADRUPED_SDK_MAPPING_SLAM_HPP

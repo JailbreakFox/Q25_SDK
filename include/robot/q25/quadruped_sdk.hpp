@@ -19,9 +19,29 @@
 #include "motion/motion_control.hpp"
 #include "motion/motion_state.hpp"
 
+// 导航 Navigation
+#include "navigation/point_navigation.hpp"
+#include "navigation/track_navigation.hpp"
+
 // 建图与定位 Mapping & Localization
 #include "mapping/slam.hpp"
 #include "mapping/map_manager.hpp"
+
+// 传感器 Sensors
+#include "sensor/imu.hpp"
+#include "sensor/lidar.hpp"
+#include "sensor/battery.hpp"
+#include "sensor/joint.hpp"
+#include "sensor/camera.hpp"
+
+// 安全监控 Safety
+#include "safety/safety_monitor.hpp"
+
+// 自主充电 Charging
+#include "charging/auto_charge.hpp"
+
+// 系统信息 System
+#include "system/system_info.hpp"
 
 // 工具 Utilities
 #include "utils/error.hpp"
@@ -34,8 +54,8 @@
 #define QUADRUPED_SDK_VERSION_PATCH 0
 #define QUADRUPED_SDK_VERSION "1.0.0"
 
-namespace quadruped {
-namespace sdk {
+namespace robot {
+namespace q25 {
 
 /**
  * 获取SDK版本字符串
@@ -53,7 +73,7 @@ inline void getSDKVersionNumber(int& major, int& minor, int& patch) {
     patch = QUADRUPED_SDK_VERSION_PATCH;
 }
 
-} // namespace sdk
-} // namespace quadruped
+} // namespace q25
+} // namespace robot
 
 #endif // QUADRUPED_SDK_HPP
