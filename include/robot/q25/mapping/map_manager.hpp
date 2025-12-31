@@ -9,117 +9,128 @@ namespace robot {
 namespace q25 {
 
 /**
- * 地图元数据
- */
-struct MapMetadata {
-    uint32_t width;           // 宽度 (像素)
-    uint32_t height;          // 高度 (像素)
-    float resolution;         // 分辨率 (m/pixel)
-    Pose origin;              // 地图原点位姿
-    double creation_time;     // 创建时间
-    double modification_time; // 修改时间
-};
-
-/**
- * MapManager - 地图管理接口
- * 提供场景和地图的管理功能
- * 可独立使用，不依赖其他模块
+ * MapManager - 地图与导航轨迹管理接口
+ * 提供场景、地图、导航轨迹的管理功能
  */
 class MapManager {
 public:
-    /**
-     * 构造函数
-     */
     explicit MapManager();
-
     virtual ~MapManager() = default;
 
     // ============ 场景管理 ============
 
-    /**
-     * 获取所有场景列表
-     * @return 场景信息列表
-     */
-    virtual std::vector<SceneInfo> getScenes() = 0;
+	/**
+	 * 请求获取最新场景
+	 */
+    virtual void refreshScenes() = 0;
+	
+	/**
+	 * 订阅场景上报事件
+	 * 由refreshScenes()请求后上报
+	 */
+	virtual void subscribeSceneUpdate(SceneUpdateCallback callback) = 0;
 
     /**
-     * 获取场景详情
-     * @param scene_id 场景ID
-     * @return 场景信息
+     * 获取所有场景列表
+	 * refreshScenes()刷新完成后，通过此方法获取最新数据
+     * @return 场景名称列表
      */
-    virtual SceneInfo getScene(uint32_t scene_id) = 0;
+    virtual std::vector<std::string> getScenes() = 0;
+
+    /**
+     * 获取所有场景详情
+	 * refreshScenes()刷新完成后，通过此方法获取最新数据
+     * @return 场景详情列表（包含所有场景及其子场景信息）
+     */
+    virtual std::vector<SceneDetail> getScenesDetails() = 0;
+
+    /**
+     * 获取指定场景详情
+     * @param scene_name 场景名称
+     * @return 场景详情（包含子场景列表）
+     */
+    virtual SceneDetail getScenesDetail(const std::string& scene_name) = 0;
 
     /**
      * 删除场景
-     * @param scene_id 场景ID
-     * @return true表示删除成功
-     */
-    virtual bool deleteScene(uint32_t scene_id) = 0;
-
-    /**
-     * 重命名场景
-     * @param scene_id 场景ID
-     * @param new_name 新场景名称
-     * @return true表示重命名成功
-     */
-    virtual bool renameScene(uint32_t scene_id, const std::string& new_name) = 0;
-
-    /**
-     * 导出场景
-     * @param scene_id 场景ID
-     * @param export_path 导出路径
-     * @return true表示导出成功
-     */
-    virtual bool exportScene(uint32_t scene_id, const std::string& export_path) = 0;
-
-    /**
-     * 导入场景
-     * @param import_path 导入路径
      * @param scene_name 场景名称
-     * @return 场景ID，失败返回0
      */
-    virtual uint32_t importScene(const std::string& import_path, const std::string& scene_name) = 0;
+    virtual void deleteScene(const std::string& scene_name) = 0;
+
+    /**
+     * 删除所有场景
+     */
+    virtual void deleteAllScenes() = 0;
 
     // ============ 地图管理 ============
 
     /**
-     * 获取地图元数据
-     * @param scene_id 场景ID
-     * @return 地图元数据
+     * 下载地图文件到本地
+     * SDK内部通过FTP下载YAM和PGM文件到指定目录
+     * @param scene_name 场景名称
+     * @param sub_scene_id 子场景ID
+     * @param save_dir 保存目录（绝对路径）
+     * @param callback 下载完成回调（参数表示成功/失败）
      */
-    virtual MapMetadata getMapMetadata(uint32_t scene_id) = 0;
+    virtual void downloadMap(const std::string& scene_name,
+                            uint32_t sub_scene_id,
+                            const std::string& save_dir,
+                            std::function<void(bool)> callback) = 0;
+
+    // ============ 导航轨迹管理 ============
+
+	/**
+	 * 请求获取最新导航轨迹
+	 */
+    virtual void refreshTrajectories() = 0;
 
     /**
-     * 获取地图图像数据 (PGM格式)
-     * @param scene_id 场景ID
-     * @param output_buffer [out] 输出缓冲区
-     * @param buffer_size [in/out] 缓冲区大小
-     * @return true表示获取成功
+     * 获取指定场景的所有导航轨迹详情
+     * @param scene_name 场景名称
+     * @return 导航轨迹列表
      */
-    virtual bool getMapImage(uint32_t scene_id, uint8_t* output_buffer, size_t& buffer_size) = 0;
+    virtual std::vector<NavigationTrajectory> getNavigationTrajectories() = 0;
 
     /**
-     * 保存地图到文件
-     * @param scene_id 场景ID
-     * @param file_path 文件路径
-     * @return true表示保存成功
+     * 获取指定场景的路径详情
+     * @param scene_name 场景名称
+     * @return 某场景的导航轨迹
      */
-    virtual bool saveMapToFile(uint32_t scene_id, const std::string& file_path) = 0;
-
-    // ============ 场景状态 ============
+    virtual NavigationTrajectory getNavigationTrajectory(const std::string& scene_name) = 0;
 
     /**
-     * 获取当前加载的场景ID
-     * @return 场景ID，未加载返回0
+     * 获取指定场景-路径的路径详情
+     * @param scene_name 场景名称
+     * @param path_name 路径名称
+     * @return 导航路径详情
      */
-    virtual uint32_t getCurrentSceneId() const = 0;
+    virtual NavigationPath getNavigationPath(const std::string& scene_name,
+                                             const std::string& path_name) = 0;
+
+	/**
+     * 删除某场景的导航轨迹
+     * @param scene_name 场景名称
+     */
+    virtual void deleteNavigationTrajectory(const std::string& scene_name) = 0;
 
     /**
-     * 检查场景是否存在
-     * @param scene_id 场景ID
-     * @return true表示场景存在
+     * 删除某场景-路径的导航路径
+     * @param scene_name 场景名称
+     * @param path_name 路径名称
      */
-    virtual bool sceneExists(uint32_t scene_id) const = 0;
+    virtual void deleteNavigationPath(const std::string& scene_name,
+                                      const std::string& path_name) = 0;
+
+    /**
+     * 重命名导航轨迹
+     * 对应MQTT话题: /MOCTS/ModifyPath
+     * @param scene_name 场景名称
+     * @param old_trajectory_name 旧轨迹名称
+     * @param new_trajectory_name 新轨迹名称
+     */
+    virtual void renameNavigationTrajectory(const std::string& scene_name,
+                                            const std::string& old_trajectory_name,
+                                            const std::string& new_trajectory_name) = 0;
 };
 
 } // namespace q25

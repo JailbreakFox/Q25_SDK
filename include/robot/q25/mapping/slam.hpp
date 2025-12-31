@@ -3,76 +3,56 @@
 
 #include "../core/types.hpp"
 #include <string>
+#include <vector>
 
 namespace robot {
 namespace q25 {
 
 /**
- * 建图状态
- */
-enum class MappingStatus {
-    IDLE = 0,        // 空闲
-    RUNNING = 1,     // 建图中
-    PAUSED = 2,      // 已暂停
-    SAVING = 3,      // 保存中
-    COMPLETED = 4,   // 已完成
-    FAILED = 5       // 失败
-};
-
-/**
- * 建图统计信息
- */
-struct MappingStatistics {
-    float mapped_area;          // 已建图区域面积 (m²)
-    uint32_t trajectory_length; // 轨迹长度 (m)
-    uint32_t duration;          // 建图时长 (秒)
-    float loop_closure_count;   // 回环检测次数
-};
-
-/**
  * SLAM - 建图与定位接口
- * 提供SLAM建图和实时定位功能
- * 可独立使用，不依赖其他模块
+ * 提供SLAM建图、定位、轨迹录制功能
  */
 class SLAM {
 public:
-    /**
-     * 构造函数
-     */
     explicit SLAM();
-
     virtual ~SLAM() = default;
 
-    // ============ 建图任务下发功能 ============
+    // ============ 建图功能 ============
 
     /**
      * 开始建图
      * @param scene_name 场景名称
+     * @param scene_type 场景类型（室内/室外普通/室外空旷）
      */
-    virtual void startMapping(const std::string& scene_name) = 0;
+    virtual void startMapping(const std::string& scene_name, MappingSceneType scene_type) = 0;
 
     /**
-     * 停止建图并保存
-     * @param scene_name 场景名称(要与开始建图的场景名称一致)
+     * 结束建图并保存（默认使用上一次的开始建图场景）
+     * @param scene_name 场景名称
      */
-    virtual void stopMappingAndSave(const std::string& scene_name) = 0;
-
-    // ============ 建图结果读取功能 ============
+    virtual void finishMapping() = 0;
 
     /**
-     * 获取建图状态(1.4.2.6)
-     * @return 建图状态
+     * 获取SLAM工作模式
+     * @return 当前工作模式（0=空闲, 1=建图, 2=保存, 3=重定位, 4=定位）
      */
-    virtual MappingStatus getMappingStatus() const = 0;
+    virtual SLAMWorkMode getWorkMode() const = 0;
 
     /**
-     * 获取建图统计信息
-     * @return 统计信息
+     * 获取SLAM错误码
+     * @return 错误码（0=正常, 1-12=各种错误）
      */
-    virtual MappingStatistics getMappingStatistics() const = 0;
+    virtual SLAMErrorCode getErrorCode() const = 0;
+	
+    /**
+     * 获取建图路径点
+	 * 注意：必须在建图模式下且定位正常时才能获取路径点
+     * @return 建图路径点列表（实时更新）
+     */
+    virtual std::vector<MappingPathPoint> getMappingPathPoints() const = 0;
 
     /**
-     * 检查是否正在建图(1.4.2.6)
+     * 检查是否正在建图
      * @return true表示正在建图
      */
     virtual bool isMapping() const = 0;
@@ -80,29 +60,52 @@ public:
     // ============ 定位功能 ============
 
     /**
-     * 获取当前位姿 (在已加载场景中)
-     * @return 当前位姿
+     * 开启定位
+     * @param scene_name 场景名称
      */
-    virtual Pose getCurrentPose() const = 0;
+    virtual void startLocalization(const std::string& scene_name) = 0;
 
     /**
-     * 获取定位置信度
-     * @return 置信度 (0.0-1.0)
+     * 关闭定位
+     * @param scene_name 场景名称
      */
-    virtual float getLocalizationConfidence() const = 0;
+    virtual void stopLocalization(const std::string& scene_name) = 0;
 
     /**
-     * 设置初始位姿 (用于定位初始化)
-     * @param pose 初始位姿
-     * @return true表示设置成功
+     * 获取当前定位信息
+     * @return 定位信息
      */
-    virtual bool setInitialPose(const Pose& pose) = 0;
+    virtual LocalizationInfo getLocalizationInfo() const = 0;
 
     /**
      * 检查定位是否正常
-     * @return true表示定位正常
      */
-    virtual bool isLocalized() const = 0;
+    virtual void isLocalized() const = 0;
+
+    // ============ 轨迹录制功能 ============
+
+    /**
+     * 开始轨迹录制（默认双向）
+     * 注意：必须在定位模式下且定位正常时才能开始录制
+     */
+    virtual void startRecording() = 0;
+
+    /**
+     * 在当前位置添加路径点（关键点）
+     */
+    virtual void addPathPoint() = 0;
+
+    /**
+     * 结束轨迹录制并保存
+     */
+    virtual void finishRecording() = 0;
+
+    /**
+     * 订阅录制事件
+     * 轨迹录制过程中触发回调
+     * @param callback 事件回调函数
+     */
+    virtual void subscribeRecordingEvent(RecordingEventCallback callback) = 0;
 };
 
 } // namespace q25

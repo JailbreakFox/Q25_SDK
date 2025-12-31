@@ -62,31 +62,10 @@ enum class JointId {
     HR_KNEE = 11    // 右后膝
 };
 
-// 场景信息
-struct SceneInfo {
-    uint32_t scene_id;
-    std::string scene_name;
-    std::vector<std::string> map_files;  // yam, pgm files
-};
-
-// 路径点
-struct WayPoint {
-    uint32_t point_id;
-    Pose pose;
-};
-
-// 导航路径
-struct NavigationPath {
-    uint32_t path_id;
-    std::string path_name;
-    std::vector<WayPoint> waypoints;
-    bool bidirectional;  // 单向/双向
-};
-
 // 导航模式
 enum class NavigationMode {
     NONE = 0,
-    POINT_TO_POINT = 1,  // 定点导航
+    POINT_TO_POINT = 1,   // 定点导航
     TRACK_FOLLOWING = 2   // 循迹导航
 };
 
@@ -157,6 +136,126 @@ struct IMUData {
 struct BatteryState {
     uint8_t percentage;  // 0-100%
     bool is_charging;
+};
+
+// ============ SLAM 建图与定位相关类型 ============
+
+// SLAM工作模式（对齐实际系统）
+enum class SLAMWorkMode {
+    IDLE = 0,         // 空闲模式
+    MAPPING = 1,      // 建图模式
+    SAVING = 2,       // 保存地图模式
+    RELOCATING = 3,   // 重定位模式
+    LOCALIZING = 4    // 定位模式
+};
+
+// SLAM错误码（对齐实际系统）
+enum class SLAMErrorCode {
+    NORMAL = 0,           // 无异常
+    UNABLE_START = 1,     // 无法启动定位
+    NO_IMU = 2,           // 无IMU数据
+    NO_LIDAR = 3,         // 无雷达数据
+    LIDAR_INCOMPLETE = 4, // 雷达被遮挡
+    MAP_NOFOUND = 5,      // 无法找到3D地图
+    LOCALIZE_ERROR = 6,   // 定位失败
+    SLAM_COLLAPSE = 7,    // SLAM崩溃
+    MAPPING_FAIL = 8,     // 建图失败
+    LIDAR_ERROR = 9,      // 雷达异常
+    IMU_ERROR = 10,       // IMU异常
+    GNSS_ERROR = 11,      // GNSS异常
+    SYNC_ERROR = 12       // 传感器同步异常
+};
+
+// 建图场景类型
+enum class MappingSceneType {
+    INDOOR = 1,        // 室内建图
+    OUTDOOR_NORMAL = 2,  // 室外普通建图
+    OUTDOOR_OPEN = 3     // 室外空旷建图
+};
+
+// 建图命令
+enum class MappingCommand {
+    START = 1,    // 开始建图
+    FINISH = 2    // 结束建图
+};
+
+// 建图路径点
+struct MappingPathPoint {
+    double x;
+    double y;
+    double z;
+};
+
+// 定位信息
+struct LocalizationInfo {
+    float position_x;
+    float position_y;
+    float position_z;
+    float orientation_w;
+    float orientation_x;
+    float orientation_y;
+    float orientation_z;
+    float laser_quality;  // 激光定位质量
+};
+
+// ============ 轨迹录制相关类型 ============
+
+// 轨迹录制命令
+enum class RecordCommand {
+    START = 0,  // 开始录制
+    ADD = 1,    // 添加点位
+    END = 2     // 结束录制
+};
+
+// 轨迹录制结果
+enum class RecordResult {
+    POINT_ADDED = 0,  // 添加点位成功
+    SUCCESS = 1,      // 完成录制
+    FAIL = 2          // 录制失败
+};
+
+// 轨迹录制事件回调类型
+using RecordingEventCallback = std::function<void(RecordResult)>;
+
+// 场景更新事件回调类型
+using SceneUpdateCallback = std::function<void(std::vector<SceneDetail>)>;
+
+// 导航轨迹更新事件回调类型
+using NavigationTrajectoryUpdateCallback = std::function<void(std::vector<NavigationTrajectory>)>;
+
+// 子场景信息
+struct SceneInfo {
+    uint32_t sub_scene_id;       // 子场景ID
+    std::string yam_filename;    // YAM文件路径
+    std::string pgm_filename;    // PGM文件路径
+};
+
+// 场景详情
+struct SceneDetail {
+    std::string scene_name;
+    std::vector<SceneInfo> sub_scenes;  // 子场景列表
+};
+
+// 导航点
+struct NavigationPoint {
+    int32_t point_id;     // 点ID
+    int32_t sub_scene_id; // 子场景ID
+    Pose pose;            // 位姿
+};
+
+// 导航路径
+struct NavigationPath {
+    int32_t path_id;                      // 路径ID
+    std::string path_name;                // 路径名称
+    std::vector<NavigationPoint> points;  // 路径点列表
+};
+
+// 导航轨迹
+struct NavigationTrajectory {
+    int32_t trajectory_id;                     // 轨迹ID
+    std::string scene_name;                    // 场景名称
+    std::vector<NavigationPoint> waypoints;    // 导航点信息
+    std::vector<NavigationPath> paths;         // 导航路径信息
 };
 
 } // namespace q25
