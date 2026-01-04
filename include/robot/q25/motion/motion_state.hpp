@@ -1,7 +1,7 @@
 #ifndef QUADRUPED_SDK_MOTION_STATE_HPP
 #define QUADRUPED_SDK_MOTION_STATE_HPP
 
-#include "../core/types.hpp"
+#include "../common/types.hpp"
 #include <string>
 
 namespace robot {

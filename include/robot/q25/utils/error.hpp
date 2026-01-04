@@ -1,7 +1,7 @@
 #ifndef QUADRUPED_SDK_UTILS_ERROR_HPP
 #define QUADRUPED_SDK_UTILS_ERROR_HPP
 
-#include "../core/types.hpp"
+#include "../common/types.hpp"
 #include <string>
 #include <exception>
 

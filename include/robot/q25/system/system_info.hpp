@@ -1,7 +1,7 @@
 #ifndef QUADRUPED_SDK_SYSTEM_INFO_HPP
 #define QUADRUPED_SDK_SYSTEM_INFO_HPP
 
-#include "../core/types.hpp"
+#include "../common/types.hpp"
 #include <cstdint>
 #include <string>
 

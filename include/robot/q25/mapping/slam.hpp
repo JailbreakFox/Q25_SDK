@@ -1,7 +1,7 @@
 #ifndef QUADRUPED_SDK_MAPPING_SLAM_HPP
 #define QUADRUPED_SDK_MAPPING_SLAM_HPP
 
-#include "../core/types.hpp"
+#include "../common/types.hpp"
 #include <string>
 #include <vector>
 
@@ -78,9 +78,9 @@ public:
     virtual LocalizationInfo getLocalizationInfo() const = 0;
 
     /**
-     * 检查定位是否正常
+     * 检查是否正在定位中
      */
-    virtual void isLocalized() const = 0;
+    virtual bool isLocalized() const = 0;
 
     // ============ 轨迹录制功能 ============
 

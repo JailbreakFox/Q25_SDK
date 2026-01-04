@@ -1,7 +1,7 @@
 #ifndef QUADRUPED_SDK_SENSOR_JOINT_HPP
 #define QUADRUPED_SDK_SENSOR_JOINT_HPP
 
-#include "../core/types.hpp"
+#include "../common/types.hpp"
 #include <array>
 #include <cstdint>
 

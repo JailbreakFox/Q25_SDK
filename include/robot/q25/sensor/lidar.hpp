@@ -1,7 +1,7 @@
 #ifndef QUADRUPED_SDK_SENSOR_LIDAR_HPP
 #define QUADRUPED_SDK_SENSOR_LIDAR_HPP
 
-#include "../core/types.hpp"
+#include "../common/types.hpp"
 #include <vector>
 #include <cstdint>
 #include <string>

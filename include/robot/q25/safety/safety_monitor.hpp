@@ -1,7 +1,7 @@
 #ifndef QUADRUPED_SDK_SAFETY_MONITOR_HPP
 #define QUADRUPED_SDK_SAFETY_MONITOR_HPP
 
-#include "../core/types.hpp"
+#include "../common/types.hpp"
 #include <cstdint>
 #include <vector>
 

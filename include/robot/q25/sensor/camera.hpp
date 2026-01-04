@@ -1,7 +1,7 @@
 #ifndef QUADRUPED_SDK_SENSOR_CAMERA_HPP
 #define QUADRUPED_SDK_SENSOR_CAMERA_HPP
 
-#include "../core/types.hpp"
+#include "../common/types.hpp"
 #include <cstdint>
 #include <string>
 

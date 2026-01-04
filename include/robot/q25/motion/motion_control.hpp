@@ -1,7 +1,7 @@
 #ifndef QUADRUPED_SDK_MOTION_CONTROL_HPP
 #define QUADRUPED_SDK_MOTION_CONTROL_HPP
 
-#include "../core/types.hpp"
+#include "../common/types.hpp"
 
 namespace robot {
 namespace q25 {

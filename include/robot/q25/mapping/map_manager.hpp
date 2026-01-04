@@ -1,7 +1,7 @@
 #ifndef QUADRUPED_SDK_MAPPING_MAP_MANAGER_HPP
 #define QUADRUPED_SDK_MAPPING_MAP_MANAGER_HPP
 
-#include "../core/types.hpp"
+#include "../common/types.hpp"
 #include <string>
 #include <vector>
 

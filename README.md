@@ -29,7 +29,7 @@ Q25_SDK 是天狼 Q25 Ultra 四足机器人的 C++ 软件开发套件，提供�
 #include <robot/q25/quadruped_sdk.hpp>
 
 // 或单独包含需要的模块
-#include <robot/q25/core/types.hpp>
+#include <robot/q25/common/types.hpp>
 #include <robot/q25/motion/motion_control.hpp>
 #include <robot/q25/sensor/joint.hpp>
 ```

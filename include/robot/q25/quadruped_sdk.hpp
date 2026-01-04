@@ -12,8 +12,8 @@
  */
 
 // 核心模块 Core
-#include "core/types.hpp"            // 类型定义
-#include "core/robot.hpp"            // 连接管理
+#include "common/types.hpp"            // 类型定义
+#include "common/robot.hpp"            // 连接管理
 
 // 运动控制 Motion Control
 #include "motion/motion_control.hpp"
