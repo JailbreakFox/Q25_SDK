@@ -85,52 +85,51 @@ public:
     virtual void refreshTrajectories() = 0;
 
     /**
-     * 获取指定场景的所有导航轨迹详情
+     * 获取所有场景的导航轨迹组详情
      * @param scene_name 场景名称
-     * @return 导航轨迹列表
+     * @return 所有场景的导航轨迹组列表
      */
     virtual std::vector<NavigationTrajectory> getNavigationTrajectories() = 0;
 
     /**
-     * 获取指定场景的路径详情
+     * 获取指定场景的导航轨迹组详情
      * @param scene_name 场景名称
-     * @return 某场景的导航轨迹
+     * @return 某场景的导航轨迹组
      */
     virtual NavigationTrajectory getNavigationTrajectory(const std::string& scene_name) = 0;
 
     /**
-     * 获取指定场景-路径的路径详情
+     * 获取指定场景-导航轨迹组中的某条轨迹详情
      * @param scene_name 场景名称
      * @param path_name 路径名称
-     * @return 导航路径详情
+     * @return 某场景-导航轨迹组的某条轨迹详情
      */
     virtual NavigationPath getNavigationPath(const std::string& scene_name,
                                              const std::string& path_name) = 0;
 
 	/**
-     * 删除某场景的导航轨迹
+     * 删除某场景的导航轨迹组
      * @param scene_name 场景名称
      */
     virtual void deleteNavigationTrajectory(const std::string& scene_name) = 0;
 
     /**
-     * 删除某场景-路径的导航路径
+     * 删除某场景-导航轨迹组中的某条轨迹
      * @param scene_name 场景名称
-     * @param path_name 路径名称
+     * @param path_name 轨迹名称
      */
     virtual void deleteNavigationPath(const std::string& scene_name,
                                       const std::string& path_name) = 0;
 
     /**
-     * 重命名导航轨迹
-     * 对应MQTT话题: /MOCTS/ModifyPath
+     * 重命名某场景-导航轨迹组中的某条轨迹
      * @param scene_name 场景名称
-     * @param old_trajectory_name 旧轨迹名称
-     * @param new_trajectory_name 新轨迹名称
+     * @param old_path_name 旧轨迹名称
+     * @param new_path_name 新轨迹名称
      */
     virtual void renameNavigationTrajectory(const std::string& scene_name,
-                                            const std::string& old_trajectory_name,
-                                            const std::string& new_trajectory_name) = 0;
+                                            const std::string& old_path_name,
+                                            const std::string& new_path_name) = 0;
 };
 
 } // namespace q25

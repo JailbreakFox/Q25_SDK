@@ -2,6 +2,7 @@
 #define QUADRUPED_SDK_CORE_TYPES_HPP
 
 #include <cstdint>
+#include <functional>
 #include <string>
 #include <vector>
 
@@ -214,15 +215,6 @@ enum class RecordResult {
     FAIL = 2          // 录制失败
 };
 
-// 轨迹录制事件回调类型
-using RecordingEventCallback = std::function<void(RecordResult)>;
-
-// 场景更新事件回调类型
-using SceneUpdateCallback = std::function<void(std::vector<SceneDetail>)>;
-
-// 导航轨迹更新事件回调类型
-using NavigationTrajectoryUpdateCallback = std::function<void(std::vector<NavigationTrajectory>)>;
-
 // 子场景信息
 struct SceneInfo {
     uint32_t sub_scene_id;       // 子场景ID
@@ -257,6 +249,15 @@ struct NavigationTrajectory {
     std::vector<NavigationPoint> waypoints;    // 导航点信息
     std::vector<NavigationPath> paths;         // 导航路径信息
 };
+
+// 轨迹录制事件回调类型
+using RecordingEventCallback = std::function<void(RecordResult)>;
+
+// 场景更新事件回调类型
+using SceneUpdateCallback = std::function<void(std::vector<SceneDetail>)>;
+
+// 导航轨迹更新事件回调类型
+using NavigationTrajectoryUpdateCallback = std::function<void(std::vector<NavigationTrajectory>)>;
 
 } // namespace q25
 } // namespace robot

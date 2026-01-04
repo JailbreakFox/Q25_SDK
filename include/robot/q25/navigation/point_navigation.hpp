@@ -59,26 +59,6 @@ public:
     // ============ 导航点管理 ============
 
     /**
-     * 获取当前场景的所有导航点
-     * @return 导航点列表
-     */
-    virtual std::vector<WayPoint> getWayPoints() = 0;
-
-    /**
-     * 添加导航点 (在当前位置)
-     * @param point_name 导航点名称
-     * @return 导航点ID，失败返回0
-     */
-    virtual uint32_t addWayPoint(const std::string& point_name) = 0;
-
-    /**
-     * 删除导航点
-     * @param point_id 导航点ID
-     * @return true表示删除成功
-     */
-    virtual bool deleteWayPoint(uint32_t point_id) = 0;
-
-    /**
      * 更新导航点位姿
      * @param point_id 导航点ID
      * @param pose 新的位姿
