@@ -45,7 +45,7 @@ public:
 
 private:
     std::unique_ptr<RobotImpl> pImpl;
-    
+
     // 禁用拷贝
     Robot(const Robot&) = delete;
     Robot& operator=(const Robot&) = delete;
