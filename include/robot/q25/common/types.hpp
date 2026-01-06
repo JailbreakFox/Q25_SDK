@@ -237,9 +237,9 @@ struct NavigationPoint {
 
 // 导航路径
 struct NavigationPath {
-    int32_t path_id;                      // 路径ID
-    std::string path_name;                // 路径名称
-    std::vector<NavigationPoint> points;  // 路径点列表
+    int32_t path_id;              // 路径ID
+    std::string path_name;        // 路径名称
+    std::vector<Pose> points;     // 路径点列表（仅包含位姿信息）
 };
 
 // 导航轨迹
