@@ -14,12 +14,12 @@ namespace q25 {
  */
 class IMUSensor {
 public:
-    /**
-     * 构造函数
-     */
-    explicit IMUSensor();
+    IMUSensor();
+    ~IMUSensor();
 
-    virtual ~IMUSensor() = default;
+    // 禁用复制
+    IMUSensor(const IMUSensor&) = delete;
+    IMUSensor& operator=(const IMUSensor&) = delete;
 
     // ============ 数据访问 ============
 
@@ -27,7 +27,7 @@ public:
      * 获取当前IMU数据
      * @return IMU数据
      */
-    virtual IMUData getData() const = 0;
+    IMUData getData() const;
 
     /**
      * 获取欧拉角 (度)
@@ -35,7 +35,7 @@ public:
      * @param pitch [out] 俯仰角
      * @param yaw [out] 偏航角
      */
-    virtual void getOrientation(float& roll, float& pitch, float& yaw) const = 0;
+    void getOrientation(float& roll, float& pitch, float& yaw) const;
 
     /**
      * 获取角速度 (rad/s)
@@ -43,7 +43,7 @@ public:
      * @param omega_y [out] Y轴角速度
      * @param omega_z [out] Z轴角速度
      */
-    virtual void getAngularVelocity(float& omega_x, float& omega_y, float& omega_z) const = 0;
+    void getAngularVelocity(float& omega_x, float& omega_y, float& omega_z) const;
 
     /**
      * 获取线加速度 (m/s²)
@@ -51,7 +51,11 @@ public:
      * @param acc_y [out] Y轴加速度
      * @param acc_z [out] Z轴加速度
      */
-    virtual void getLinearAcceleration(float& acc_x, float& acc_y, float& acc_z) const = 0;
+    void getLinearAcceleration(float& acc_x, float& acc_y, float& acc_z) const;
+
+private:
+    struct Impl;
+    Impl* impl_;
 };
 
 } // namespace q25

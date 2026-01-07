@@ -54,12 +54,12 @@ struct ResourceStatus {
  */
 class SystemInfo {
 public:
-    /**
-     * 构造函数
-     */
-    explicit SystemInfo();
+    SystemInfo();
+    ~SystemInfo();
 
-    virtual ~SystemInfo() = default;
+    // 禁用复制
+    SystemInfo(const SystemInfo&) = delete;
+    SystemInfo& operator=(const SystemInfo&) = delete;
 
     // ============ 信息查询 ============
 
@@ -67,25 +67,29 @@ public:
      * 获取版本信息
      * @return 各模块版本信息
      */
-    virtual VersionInfo getVersionInfo() const = 0;
+    VersionInfo getVersionInfo() const;
 
     /**
      * 获取机器人名称
      * @return 机器人名称
      */
-    virtual std::string getRobotName() const = 0;
+    std::string getRobotName() const;
 
     /**
      * 获取运动统计信息
      * @return 运动统计数据
      */
-    virtual MotionStatistics getMotionStatistics() const = 0;
+    MotionStatistics getMotionStatistics() const;
 
     /**
      * 获取系统资源状态
      * @return 资源状态信息
      */
-    virtual ResourceStatus getResourceStatus() const = 0;
+    ResourceStatus getResourceStatus() const;
+
+private:
+    struct Impl;
+    Impl* impl_;
 };
 
 } // namespace q25

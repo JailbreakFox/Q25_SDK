@@ -13,39 +13,39 @@ namespace q25 {
  */
 class MotionController {
 public:
-    /**
-     * 构造函数
-     */
-    explicit MotionController();
+    MotionController();
+    ~MotionController();
 
-    virtual ~MotionController() = default;
+    // 禁用复制
+    MotionController(const MotionController&) = delete;
+    MotionController& operator=(const MotionController&) = delete;
 
     // ============ 基础控制 ============
 
     /**
      * 站立
      */
-    virtual bool stand() = 0;
+    bool stand();
 
     /**
      * 趴下
      */
-    virtual bool lie() = 0;
+    bool lie();
 
     /**
      * 切换站立/趴下
      */
-    virtual bool toggleStand() = 0;
+    bool toggleStand();
 
     /**
      * 急停
      */
-    virtual bool emergencyStop() = 0;
+    bool emergencyStop();
 
     /**
      * 释放急停 (恢复控制)
      */
-    virtual bool releaseEmergencyStop() = 0;
+    bool releaseEmergencyStop();
 
     // ============ 运动模式 ============
 
@@ -53,12 +53,12 @@ public:
      * 设置运动模式
      * @param mode 运动模式 (MANUAL/NAVIGATION/ASSISTED)
      */
-    virtual bool setMotionMode(MotionMode mode) = 0;
+    bool setMotionMode(MotionMode mode);
 
     /**
      * 获取当前运动模式
      */
-    virtual MotionMode getMotionMode() const = 0;
+    MotionMode getMotionMode() const;
 
     // ============ 轴控制 (底层接口) ============
 
@@ -72,19 +72,19 @@ public:
      *       - LEFT_X: 0x21010131 (左右)
      *       - RIGHT_X: 0x21010135 (旋转)
      */
-    virtual bool setAxisValue(AxisType axis, int32_t value) = 0;
+    bool setAxisValue(AxisType axis, int32_t value);
 
     /**
      * 获取轴死区值
      * @param axis 轴类型
      * @return 死区阈值 (正值)
      */
-    virtual int32_t getAxisDeadzone(AxisType axis) const = 0;
+    int32_t getAxisDeadzone(AxisType axis) const;
 
     /**
      * 停止所有轴 (将所有轴值设为0)
      */
-    virtual bool stopAllAxes() = 0;
+    bool stopAllAxes();
 
     // ============ 步态控制 ============
 
@@ -92,23 +92,23 @@ public:
      * 设置步态类型
      * @param gait 步态类型 (WALK/RUN)
      */
-    virtual bool setGait(GaitType gait) = 0;
+    bool setGait(GaitType gait);
 
     /**
      * 获取当前步态类型
      */
-    virtual GaitType getGait() const = 0;
+    GaitType getGait() const;
 
     /**
      * 设置速度档位
      * @param level 速度档位 (LOW/HIGH)
      */
-    virtual bool setSpeedLevel(SpeedLevel level) = 0;
+    bool setSpeedLevel(SpeedLevel level);
 
     /**
      * 获取当前速度档位
      */
-    virtual SpeedLevel getSpeedLevel() const = 0;
+    SpeedLevel getSpeedLevel() const;
 
     // ============ 机身姿态控制 ============
 
@@ -116,7 +116,7 @@ public:
      * 设置机身高度
      * @param height 高度 (米)
      */
-    virtual bool setBodyHeight(float height) = 0;
+    bool setBodyHeight(float height);
 
     /**
      * 设置机身姿态 (roll, pitch, yaw)
@@ -124,12 +124,12 @@ public:
      * @param pitch 俯仰角 (度)
      * @param yaw 偏航角 (度)
      */
-    virtual bool setBodyPose(float roll, float pitch, float yaw) = 0;
+    bool setBodyPose(float roll, float pitch, float yaw);
 
     /**
      * 重置机身姿态 (归零)
      */
-    virtual bool resetBodyPose() = 0;
+    bool resetBodyPose();
 
     // ============ 高级控制 ============
 
@@ -137,13 +137,17 @@ public:
      * 设置最大线速度限制
      * @param max_linear_velocity 最大线速度 (m/s)
      */
-    virtual bool setMaxLinearVelocity(float max_linear_velocity) = 0;
+    bool setMaxLinearVelocity(float max_linear_velocity);
 
     /**
      * 设置最大角速度限制
      * @param max_angular_velocity 最大角速度 (rad/s)
      */
-    virtual bool setMaxAngularVelocity(float max_angular_velocity) = 0;
+    bool setMaxAngularVelocity(float max_angular_velocity);
+
+private:
+    struct Impl;
+    Impl* impl_;
 };
 
 } // namespace q25

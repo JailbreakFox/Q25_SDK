@@ -65,24 +65,29 @@ struct ErrorInfo {
  */
 class ErrorHandler {
 public:
-    virtual ~ErrorHandler() = default;
+    ErrorHandler();
+    ~ErrorHandler();
+
+    // 禁用复制
+    ErrorHandler(const ErrorHandler&) = delete;
+    ErrorHandler& operator=(const ErrorHandler&) = delete;
 
     /**
      * 获取最后一个错误
      * @return 错误信息
      */
-    virtual ErrorInfo getLastError() const = 0;
+    ErrorInfo getLastError() const;
 
     /**
      * 清除最后一个错误
      */
-    virtual void clearLastError() = 0;
+    void clearLastError();
 
     /**
      * 检查是否有错误
      * @return true表示有错误
      */
-    virtual bool hasError() const = 0;
+    bool hasError() const;
 
     /**
      * 获取错误码的字符串描述
@@ -90,6 +95,10 @@ public:
      * @return 错误描述
      */
     static std::string getErrorString(ErrorCode code);
+
+private:
+    struct Impl;
+    Impl* impl_;
 };
 
 } // namespace q25

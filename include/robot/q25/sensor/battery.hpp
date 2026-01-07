@@ -27,12 +27,12 @@ struct BatteryInfo {
  */
 class BatterySensor {
 public:
-    /**
-     * 构造函数
-     */
-    explicit BatterySensor();
+    BatterySensor();
+    ~BatterySensor();
 
-    virtual ~BatterySensor() = default;
+    // 禁用复制
+    BatterySensor(const BatterySensor&) = delete;
+    BatterySensor& operator=(const BatterySensor&) = delete;
 
     // ============ 数据访问 ============
 
@@ -40,31 +40,35 @@ public:
      * 获取电池状态
      * @return 电池状态
      */
-    virtual BatteryState getBatteryState() const = 0;
+    BatteryState getBatteryState() const;
 
     /**
      * 获取详细电池信息
      * @return 电池信息
      */
-    virtual BatteryInfo getBatteryInfo() const = 0;
+    BatteryInfo getBatteryInfo() const;
 
     /**
      * 获取电量百分比
      * @return 电量 (0-100%)
      */
-    virtual uint8_t getBatteryPercentage() const = 0;
+    uint8_t getBatteryPercentage() const;
 
     /**
      * 检查是否正在充电
      * @return true表示正在充电
      */
-    virtual bool isCharging() const = 0;
+    bool isCharging() const;
 
     /**
      * 检查电量是否低 (<20%)
      * @return true表示电量低
      */
-    virtual bool isBatteryLow() const = 0;
+    bool isBatteryLow() const;
+
+private:
+    struct Impl;
+    Impl* impl_;
 };
 
 } // namespace q25

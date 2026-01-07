@@ -59,12 +59,12 @@ struct AutoChargeInfo {
  */
 class AutoCharge {
 public:
-    /**
-     * 构造函数
-     */
-    explicit AutoCharge();
+    AutoCharge();
+    ~AutoCharge();
 
-    virtual ~AutoCharge() = default;
+    // 禁用复制
+    AutoCharge(const AutoCharge&) = delete;
+    AutoCharge& operator=(const AutoCharge&) = delete;
 
     // ============ 充电控制 ============
 
@@ -72,13 +72,13 @@ public:
      * 开始自主充电
      * @return true表示任务启动成功
      */
-    virtual bool startCharge() = 0;
+    bool startCharge();
 
     /**
      * 停止充电/取消充电任务
      * @return true表示停止成功
      */
-    virtual bool stopCharge() = 0;
+    bool stopCharge();
 
     // ============ 状态查询 ============
 
@@ -86,13 +86,17 @@ public:
      * 获取充电状态
      * @return 当前充电状态
      */
-    virtual ChargeStatus getChargeStatus() const = 0;
+    ChargeStatus getChargeStatus() const;
 
     /**
      * 检查是否正在充电
      * @return true表示正在充电中
      */
-    virtual bool isCharging() const = 0;
+    bool isCharging() const;
+
+private:
+    struct Impl;
+    Impl* impl_;
 };
 
 } // namespace q25

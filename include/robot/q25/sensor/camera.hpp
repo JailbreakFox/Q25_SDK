@@ -47,12 +47,12 @@ struct CameraInfo {
  */
 class CameraSensor {
 public:
-    /**
-     * 构造函数
-     */
-    explicit CameraSensor();
+    CameraSensor();
+    ~CameraSensor();
 
-    virtual ~CameraSensor() = default;
+    // 禁用复制
+    CameraSensor(const CameraSensor&) = delete;
+    CameraSensor& operator=(const CameraSensor&) = delete;
 
     // ============ 相机控制 ============
 
@@ -61,7 +61,7 @@ public:
      * @param type 开关类型
      * @return true表示操作成功
      */
-    virtual bool setCameraEnabled(CameraSwitchType type) = 0;
+    bool setCameraEnabled(CameraSwitchType type);
 
     // ============ 信息查询 ============
 
@@ -70,7 +70,11 @@ public:
      * @param location 相机位置
      * @return RTSP地址字符串，失败返回空字符串
      */
-    virtual std::string getRtspUrl(CameraLocation location) const = 0;
+    std::string getRtspUrl(CameraLocation location) const;
+
+private:
+    struct Impl;
+    Impl* impl_;
 };
 
 } // namespace q25

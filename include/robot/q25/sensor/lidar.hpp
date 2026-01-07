@@ -35,12 +35,12 @@ struct LiDARScan {
  */
 class LiDARSensor {
 public:
-    /**
-     * 构造函数
-     */
-    explicit LiDARSensor();
+    LiDARSensor();
+    ~LiDARSensor();
 
-    virtual ~LiDARSensor() = default;
+    // 禁用复制
+    LiDARSensor(const LiDARSensor&) = delete;
+    LiDARSensor& operator=(const LiDARSensor&) = delete;
 
     // ============ 数据访问 ============
 
@@ -49,13 +49,13 @@ public:
      * @param lidar_id LiDAR ID (0表示默认/主LiDAR)
      * @return LiDAR扫描数据
      */
-    virtual LiDARScan getLatestScan(uint32_t lidar_id = 0) const = 0;
+    LiDARScan getLatestScan(uint32_t lidar_id = 0) const;
 
     /**
      * 获取可用的LiDAR数量
      * @return LiDAR数量
      */
-    virtual uint32_t getLiDARCount() const = 0;
+    uint32_t getLiDARCount() const;
 
     // ============ 控制功能 ============
 
@@ -65,14 +65,18 @@ public:
      * @param enable true=启用, false=禁用
      * @return true表示操作成功
      */
-    virtual bool setLiDAREnabled(uint32_t lidar_id, bool enable) = 0;
+    bool setLiDAREnabled(uint32_t lidar_id, bool enable);
 
     /**
      * 检查LiDAR是否启用
      * @param lidar_id LiDAR ID
      * @return true表示已启用
      */
-    virtual bool isLiDAREnabled(uint32_t lidar_id) const = 0;
+    bool isLiDAREnabled(uint32_t lidar_id) const;
+
+private:
+    struct Impl;
+    Impl* impl_;
 };
 
 } // namespace q25

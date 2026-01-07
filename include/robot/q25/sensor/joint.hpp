@@ -40,12 +40,12 @@ struct AllJointsData {
  */
 class JointSensor {
 public:
-    /**
-     * 构造函数
-     */
-    explicit JointSensor();
+    JointSensor();
+    ~JointSensor();
 
-    virtual ~JointSensor() = default;
+    // 禁用复制
+    JointSensor(const JointSensor&) = delete;
+    JointSensor& operator=(const JointSensor&) = delete;
 
     // ============ 数据访问 ============
 
@@ -53,19 +53,23 @@ public:
      * 获取所有关节数据
      * @return 12个关节的完整数据
      */
-    virtual AllJointsData getAllJointsData() const = 0;
+    AllJointsData getAllJointsData() const;
 
     /**
      * 获取驱动器温度数组
      * @return 12个驱动器的温度 (℃)
      */
-    virtual std::array<float, JOINT_COUNT> getDriverTemperatures() const = 0;
+    std::array<float, JOINT_COUNT> getDriverTemperatures() const;
 
     /**
      * 获取电机温度数组
      * @return 12个电机的温度 (℃)
      */
-    virtual std::array<float, JOINT_COUNT> getMotorTemperatures() const = 0;
+    std::array<float, JOINT_COUNT> getMotorTemperatures() const;
+
+private:
+    struct Impl;
+    Impl* impl_;
 };
 
 } // namespace q25

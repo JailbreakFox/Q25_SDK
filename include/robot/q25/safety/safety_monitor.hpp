@@ -83,12 +83,12 @@ struct SafetyStatus {
  */
 class SafetyMonitor {
 public:
-    /**
-     * 构造函数
-     */
-    explicit SafetyMonitor();
+    SafetyMonitor();
+    ~SafetyMonitor();
 
-    virtual ~SafetyMonitor() = default;
+    // 禁用复制
+    SafetyMonitor(const SafetyMonitor&) = delete;
+    SafetyMonitor& operator=(const SafetyMonitor&) = delete;
 
     // ============ 状态查询 ============
 
@@ -96,31 +96,35 @@ public:
      * 获取综合安全状态
      * @return 安全状态汇总
      */
-    virtual SafetyStatus getSafetyStatus() const = 0;
+    SafetyStatus getSafetyStatus() const;
 
     /**
      * 检查摔倒保护是否激活
      * @return true表示摔倒保护已激活
      */
-    virtual bool isFallProtectionActive() const = 0;
+    bool isFallProtectionActive() const;
 
     /**
      * 获取过热告警列表
      * @return 过热告警信息列表
      */
-    virtual std::vector<ThermalWarning> getThermalWarnings() const = 0;
+    std::vector<ThermalWarning> getThermalWarnings() const;
 
     /**
      * 获取电池告警
      * @return 电池告警信息
      */
-    virtual BatteryWarning getBatteryWarnings() const = 0;
+    BatteryWarning getBatteryWarnings() const;
 
     /**
      * 获取过载保护状态
      * @return 过载状态信息
      */
-    virtual OverloadStatus getOverloadStatus() const = 0;
+    OverloadStatus getOverloadStatus() const;
+
+private:
+    struct Impl;
+    Impl* impl_;
 };
 
 } // namespace q25

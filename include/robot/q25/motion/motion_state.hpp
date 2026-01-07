@@ -30,49 +30,53 @@ struct MotionState {
  */
 class MotionStateMonitor {
 public:
-    /**
-     * 构造函数
-     */
-    explicit MotionStateMonitor();
+    MotionStateMonitor();
+    ~MotionStateMonitor();
 
-    virtual ~MotionStateMonitor() = default;
+    // 禁用复制
+    MotionStateMonitor(const MotionStateMonitor&) = delete;
+    MotionStateMonitor& operator=(const MotionStateMonitor&) = delete;
 
     // ============ 状态查询 ============
 
     /**
      * 获取完整运动状态
      */
-    virtual MotionState getMotionState() const = 0;
+    MotionState getMotionState() const;
 
     /**
      * 获取机器人基本状态
      */
-    virtual RobotBasicState getRobotState() const = 0;
+    RobotBasicState getRobotState() const;
 
     /**
      * 获取当前速度
      */
-    virtual Velocity getCurrentVelocity() const = 0;
+    Velocity getCurrentVelocity() const;
 
     /**
      * 获取当前位姿 (里程计)
      */
-    virtual Pose getCurrentPose() const = 0;
+    Pose getCurrentPose() const;
 
     /**
      * 检查是否站立状态
      */
-    virtual bool isStanding() const = 0;
+    bool isStanding() const;
 
     /**
      * 检查是否在运动中
      */
-    virtual bool isMoving() const = 0;
+    bool isMoving() const;
 
     /**
      * 检查是否处于急停状态
      */
-    virtual bool isEmergencyStopped() const = 0;
+    bool isEmergencyStopped() const;
+
+private:
+    struct Impl;
+    Impl* impl_;
 };
 
 } // namespace q25
