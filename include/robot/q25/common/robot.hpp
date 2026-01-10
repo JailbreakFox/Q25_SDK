@@ -3,7 +3,6 @@
 
 #include <string>
 #include <memory>
-#include <IProxy.h>
 
 namespace robot {
 namespace q25 {
