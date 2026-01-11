@@ -12,6 +12,11 @@
 #include <chrono>
 #include <iomanip>
 #include <limits>
+#include <atomic>
+
+#ifndef WIN32
+#include <unistd.h>
+#endif
 
 using namespace robot::q25;
 
@@ -25,6 +30,8 @@ private:
     SLAM* slam;
     MapManager* map_manager;
     bool connected;
+    std::thread* monitor_thread;      // 连接监控线程
+    std::atomic<bool> should_monitor;  // 是否继续监控
 
     /**
      * @brief 清除输入缓冲区
@@ -83,47 +90,86 @@ private:
     }
 
 public:
-    MappingCLI() : robot(nullptr), slam(nullptr), map_manager(nullptr), connected(false) {
-        // 直接实例化SLAM和MapManager
-        slam = new SLAM();
-        map_manager = new MapManager();
+    MappingCLI() : robot(nullptr), slam(nullptr), map_manager(nullptr), connected(false),
+                   monitor_thread(nullptr), should_monitor(false) {
     }
 
     ~MappingCLI() {
-        disconnect();
+        // 停止监控线程
+        if (monitor_thread) {
+            should_monitor = false;
+            if (monitor_thread->joinable()) {
+                monitor_thread->join();
+            }
+            delete monitor_thread;
+            monitor_thread = nullptr;
+        }
+
         if (slam) delete slam;
         if (map_manager) delete map_manager;
+        if (robot) {
+            delete robot;
+            robot = nullptr;
+        }
     }
 
     // ============ 连接管理 ============
 
     /**
+     * @brief 连接监控线程函数
+     * 持续检查连接状态并更新全局变量
+     */
+    void monitorConnection() {
+        while (should_monitor) {
+            if (robot) {
+                connected = robot->isConnected();
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        }
+    }
+
+    /**
      * @brief 连接到机器人
      */
     void connectToRobot(const std::string& ip) {
-        if (connected) {
+        if (connected || monitor_thread) {
             std::cout << "已连接到机器人，请先断开连接。" << std::endl;
             return;
         }
 
         std::cout << "正在连接到机器人 " << ip << "..." << std::endl;
+        std::cout << "[DEBUG] 创建 Robot 对象..." << std::endl;
         robot = new Robot(ip);
 
         try {
+            std::cout << "[DEBUG] 调用 robot->connect()..." << std::endl;
             robot->connect();
-            // 等待连接建立
-            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+            std::cout << "[DEBUG] connect() 返回成功" << std::endl;
 
-            if (robot->isConnected()) {
-                connected = true;
-                std::cout << "成功连接到机器人!" << std::endl;
-            } else {
-                std::cout << "连接失败，请检查IP地址是否正确。" << std::endl;
-                delete robot;
-                robot = nullptr;
+            // 创建 SLAM 和 MapManager
+            std::cout << "[DEBUG] 创建 SLAM..." << std::endl;
+            if (!slam) {
+                slam = new SLAM();
             }
+            std::cout << "[DEBUG] SLAM 创建完成" << std::endl;
+
+            std::cout << "[DEBUG] 创建 MapManager..." << std::endl;
+            if (!map_manager) {
+                map_manager = new MapManager();
+            }
+            std::cout << "[DEBUG] MapManager 创建完成" << std::endl;
+
+            // 启动监控线程，持续检查连接状态
+            should_monitor = true;
+            monitor_thread = new std::thread(&MappingCLI::monitorConnection, this);
+
+            std::cout << "正在连接到机器人..." << std::endl;
         } catch (const std::exception& e) {
             std::cout << "连接异常: " << e.what() << std::endl;
+            delete robot;
+            robot = nullptr;
+        } catch (...) {
+            std::cout << "连接异常: 未知错误" << std::endl;
             delete robot;
             robot = nullptr;
         }
@@ -133,7 +179,17 @@ public:
      * @brief 断开机器人连接
      */
     void disconnect() {
-        if (!connected) {
+        // 停止监控线程
+        if (monitor_thread) {
+            should_monitor = false;
+            if (monitor_thread->joinable()) {
+                monitor_thread->join();
+            }
+            delete monitor_thread;
+            monitor_thread = nullptr;
+        }
+
+        if (!connected && !robot) {
             return;
         }
 
@@ -142,6 +198,17 @@ public:
             delete robot;
             robot = nullptr;
         }
+
+        // 断开连接时释放 SLAM 和 MapManager
+        if (slam) {
+            delete slam;
+            slam = nullptr;
+        }
+        if (map_manager) {
+            delete map_manager;
+            map_manager = nullptr;
+        }
+
         connected = false;
         std::cout << "已断开机器人连接。" << std::endl;
     }
@@ -486,7 +553,7 @@ public:
         std::cout << "========================================" << std::endl;
         std::cout << "连接状态: " << (connected ? "已连接" : "未连接") << std::endl;
 
-        if (connected) {
+        if (connected && slam) {
             SLAMWorkMode mode = slam->getWorkMode();
             SLAMErrorCode error = slam->getErrorCode();
             std::cout << "SLAM状态: " << getWorkModeString(mode)
@@ -528,10 +595,10 @@ public:
                 // 连接管理
                 case 1: {
                     std::string ip;
-                    std::cout << "\n请输入机器人IP地址 (默认: 192.168.1.100): ";
+                    std::cout << "\n请输入机器人IP地址 (默认: 192.168.1.103): ";
                     std::getline(std::cin, ip);
                     if (ip.empty()) {
-                        ip = "192.168.1.100";
+                        ip = "192.168.1.103";
                     }
                     connectToRobot(ip);
                     break;
@@ -598,6 +665,11 @@ public:
  * @brief 主函数
  */
 int main() {
+#ifdef _WIN32
+    // 设置 Windows 控制台为 UTF-8 编码
+    system("chcp 65001 > nul");
+#endif
+
     std::cout << "Q25 SDK - 定位导航功能示例程序" << std::endl;
     std::cout << "Version 1.0.0" << std::endl;
     std::cout << "本程序演示SLAM建图、定位、轨迹录制功能的交互式使用。" << std::endl;
