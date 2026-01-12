@@ -13,6 +13,7 @@
 #include <iomanip>
 #include <limits>
 #include <atomic>
+#include <mutex>
 
 #ifndef WIN32
 #include <unistd.h>
@@ -32,6 +33,7 @@ private:
     bool connected;
     std::thread* monitor_thread;      // 连接监控线程
     std::atomic<bool> should_monitor;  // 是否继续监控
+    mutable std::mutex robot_mutex;    // 保护 robot 和 connected 的互斥锁
 
     /**
      * @brief 清除输入缓冲区
@@ -121,18 +123,29 @@ public:
      */
     void monitorConnection() {
         while (should_monitor) {
-            if (robot) {
-                connected = robot->isConnected();
+            {
+                std::lock_guard<std::mutex> lock(robot_mutex);
+                if (robot) {
+                    connected = robot->isConnected();
+                }
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(200));
         }
     }
 
     /**
+     * @brief 线程安全地检查连接状态
+     */
+    bool isConnected() const {
+        std::lock_guard<std::mutex> lock(robot_mutex);
+        return connected;
+    }
+
+    /**
      * @brief 连接到机器人
      */
     void connectToRobot(const std::string& ip) {
-        if (connected || monitor_thread) {
+        if (isConnected() || monitor_thread) {
             std::cout << "已连接到机器人，请先断开连接。" << std::endl;
             return;
         }
@@ -162,8 +175,6 @@ public:
             // 启动监控线程，持续检查连接状态
             should_monitor = true;
             monitor_thread = new std::thread(&MappingCLI::monitorConnection, this);
-
-            std::cout << "正在连接到机器人..." << std::endl;
         } catch (const std::exception& e) {
             std::cout << "连接异常: " << e.what() << std::endl;
             delete robot;
@@ -189,14 +200,19 @@ public:
             monitor_thread = nullptr;
         }
 
-        if (!connected && !robot) {
-            return;
-        }
+        {
+            std::lock_guard<std::mutex> lock(robot_mutex);
+            if (!connected && !robot) {
+                return;
+            }
 
-        if (robot) {
-            robot->disconnect();
-            delete robot;
-            robot = nullptr;
+            if (robot) {
+                robot->disconnect();
+                delete robot;
+                robot = nullptr;
+            }
+
+            connected = false;
         }
 
         // 断开连接时释放 SLAM 和 MapManager
@@ -209,7 +225,6 @@ public:
             map_manager = nullptr;
         }
 
-        connected = false;
         std::cout << "已断开机器人连接。" << std::endl;
     }
 
@@ -219,7 +234,7 @@ public:
      * @brief 开始建图
      */
     void startMapping() {
-        if (!connected) {
+        if (!isConnected()) {
             std::cout << "请先连接到机器人。" << std::endl;
             return;
         }
@@ -279,7 +294,7 @@ public:
      * @brief 保存建图
      */
     void finishMapping() {
-        if (!connected) {
+        if (!isConnected()) {
             std::cout << "请先连接到机器人。" << std::endl;
             return;
         }
@@ -311,7 +326,7 @@ public:
      * @brief 显示建图状态
      */
     void showMappingStatus() {
-        if (!connected) {
+        if (!isConnected()) {
             std::cout << "请先连接到机器人。" << std::endl;
             return;
         }
@@ -345,7 +360,7 @@ public:
      * @brief 开启定位
      */
     void startLocalization() {
-        if (!connected) {
+        if (!isConnected()) {
             std::cout << "请先连接到机器人。" << std::endl;
             return;
         }
@@ -385,7 +400,7 @@ public:
      * @brief 关闭定位
      */
     void stopLocalization() {
-        if (!connected) {
+        if (!isConnected()) {
             std::cout << "请先连接到机器人。" << std::endl;
             return;
         }
@@ -419,7 +434,7 @@ public:
      * @brief 显示定位状态
      */
     void showLocalizationStatus() {
-        if (!connected) {
+        if (!isConnected()) {
             std::cout << "请先连接到机器人。" << std::endl;
             return;
         }
@@ -452,7 +467,7 @@ public:
      * @brief 开始轨迹录制
      */
     void startRecording() {
-        if (!connected) {
+        if (!isConnected()) {
             std::cout << "请先连接到机器人。" << std::endl;
             return;
         }
@@ -500,7 +515,7 @@ public:
      * @brief 添加路径点
      */
     void addPathPoint() {
-        if (!connected) {
+        if (!isConnected()) {
             std::cout << "请先连接到机器人。" << std::endl;
             return;
         }
@@ -525,7 +540,7 @@ public:
      * @brief 结束轨迹录制
      */
     void finishRecording() {
-        if (!connected) {
+        if (!isConnected()) {
             std::cout << "请先连接到机器人。" << std::endl;
             return;
         }
@@ -551,9 +566,9 @@ public:
         std::cout << "\n========================================" << std::endl;
         std::cout << "       Q25 SDK - 定位导航示例程序       " << std::endl;
         std::cout << "========================================" << std::endl;
-        std::cout << "连接状态: " << (connected ? "已连接" : "未连接") << std::endl;
+        std::cout << "连接状态: " << (isConnected() ? "已连接" : "未连接") << std::endl;
 
-        if (connected && slam) {
+        if (isConnected() && slam) {
             SLAMWorkMode mode = slam->getWorkMode();
             SLAMErrorCode error = slam->getErrorCode();
             std::cout << "SLAM状态: " << getWorkModeString(mode)
