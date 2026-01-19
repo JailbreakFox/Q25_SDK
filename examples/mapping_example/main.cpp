@@ -2,7 +2,7 @@
  * @file main.cpp
  * @brief Q25 SDK - 定位导航功能示例程序
  *
- * 本程序演示了SLAM建图、定位、轨迹录制功能的交互式使用流程
+ * 本程序演示了SLAM建图、定位、场景管理、地图管理功能的交互式使用流程
  */
 
 #include <robot/q25/quadruped_sdk.hpp>
@@ -239,11 +239,6 @@ public:
             return;
         }
 
-        if (slam->isMapping()) {
-            std::cout << "当前已在建图模式中。" << std::endl;
-            return;
-        }
-
         std::string scene_name;
         int scene_type;
 
@@ -276,7 +271,7 @@ public:
 
         try {
             slam->startMapping(scene_name, type);
-            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+            std::this_thread::sleep_for(std::chrono::milliseconds(3000));
 
             if (slam->isMapping()) {
                 std::cout << "建图已开始! 场景名称: " << scene_name
@@ -310,7 +305,7 @@ public:
         try {
             slam->finishMapping();
             // 等待保存完成
-            std::this_thread::sleep_for(std::chrono::seconds(2));
+            std::this_thread::sleep_for(std::chrono::seconds(10));
 
             if (!slam->isMapping()) {
                 std::cout << "建图已保存!" << std::endl;
@@ -383,7 +378,7 @@ public:
 
         try {
             slam->startLocalization(scene_name);
-            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+            std::this_thread::sleep_for(std::chrono::milliseconds(5000));
 
             if (slam->isLocalized()) {
                 std::cout << "定位已开启! 场景名称: " << scene_name << std::endl;
@@ -418,7 +413,7 @@ public:
 
         try {
             slam->stopLocalization(scene_name);
-            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+            std::this_thread::sleep_for(std::chrono::milliseconds(5000));
 
             if (!slam->isLocalized()) {
                 std::cout << "定位已关闭。" << std::endl;
@@ -461,97 +456,209 @@ public:
         std::cout << "  激光质量: " << info.laser_quality << std::endl;
     }
 
-    // ============ 轨迹录制功能 ============
+    // ============ 场景管理功能 ============
 
     /**
-     * @brief 开始轨迹录制
+     * @brief 输入场景名称
      */
-    void startRecording() {
-        if (!isConnected()) {
-            std::cout << "请先连接到机器人。" << std::endl;
-            return;
-        }
-
-        if (!slam->isLocalized()) {
-            std::cout << "请先开启定位功能才能开始录制!" << std::endl;
-            return;
-        }
-
-        SLAMWorkMode mode = slam->getWorkMode();
-        if (mode == SLAMWorkMode::MAPPING) {
-            std::cout << "建图模式下无法录制轨迹，请先完成建图。" << std::endl;
-            return;
-        }
-
-        std::cout << "\n=== 开始轨迹录制 ===" << std::endl;
-
-        try {
-            // 设置录制事件回调
-            slam->subscribeRecordingEvent([](RecordResult result) {
-                switch (result) {
-                    case RecordResult::POINT_ADDED:
-                        std::cout << "[事件] 路径点已添加" << std::endl;
-                        break;
-                    case RecordResult::SUCCESS:
-                        std::cout << "[事件] 录制成功完成" << std::endl;
-                        break;
-                    case RecordResult::FAIL:
-                        std::cout << "[事件] 录制失败" << std::endl;
-                        break;
-                }
-            });
-
-            slam->startRecording();
-            std::this_thread::sleep_for(std::chrono::milliseconds(500));
-
-            std::cout << "轨迹录制已开始!" << std::endl;
-            std::cout << "提示: 移动机器人并添加路径点..." << std::endl;
-        } catch (const std::exception& e) {
-            std::cout << "异常: " << e.what() << std::endl;
-        }
+    std::string inputSceneName() {
+        std::string name;
+        std::cout << "请输入场景名称: ";
+        std::getline(std::cin, name);
+        return name;
     }
 
     /**
-     * @brief 添加路径点
+     * @brief 输入下载路径
      */
-    void addPathPoint() {
-        if (!isConnected()) {
-            std::cout << "请先连接到机器人。" << std::endl;
-            return;
+    std::string inputDownloadPath() {
+        std::string path;
+        std::cout << "请输入下载路径 (默认: ./): ";
+        std::getline(std::cin, path);
+        if (path.empty()) {
+            path = "./";
         }
-
-        if (!slam->isLocalized()) {
-            std::cout << "请先开启定位并开始录制才能添加路径点!" << std::endl;
-            return;
-        }
-
-        std::cout << "\n=== 添加路径点 ===" << std::endl;
-
-        try {
-            slam->addPathPoint();
-            std::this_thread::sleep_for(std::chrono::milliseconds(200));
-            std::cout << "路径点添加指令已发送。" << std::endl;
-        } catch (const std::exception& e) {
-            std::cout << "异常: " << e.what() << std::endl;
-        }
+        return path;
     }
 
     /**
-     * @brief 结束轨迹录制
+     * @brief 刷新场景列表
      */
-    void finishRecording() {
+    void refreshScenesList() {
         if (!isConnected()) {
             std::cout << "请先连接到机器人。" << std::endl;
             return;
         }
 
-        std::cout << "\n=== 结束轨迹录制 ===" << std::endl;
-        std::cout << "正在保存轨迹..." << std::endl;
+        std::cout << "\n=== 刷新场景列表 ===" << std::endl;
+        std::cout << "正在刷新场景列表..." << std::endl;
 
         try {
-            slam->finishRecording();
+            map_manager->refreshScenes();
             std::this_thread::sleep_for(std::chrono::seconds(2));
-            std::cout << "轨迹录制已结束并保存。" << std::endl;
+            std::cout << "场景列表已刷新。" << std::endl;
+        } catch (const std::exception& e) {
+            std::cout << "异常: " << e.what() << std::endl;
+        }
+    }
+
+    /**
+     * @brief 查看场景列表
+     */
+    void showScenesList() {
+        if (!isConnected()) {
+            std::cout << "请先连接到机器人。" << std::endl;
+            return;
+        }
+
+        std::cout << "\n=== 场景列表 ===" << std::endl;
+
+        try {
+            auto scenes = map_manager->getScenes();
+            if (scenes.empty()) {
+                std::cout << "当前没有场景。" << std::endl;
+            } else {
+                std::cout << "场景数量: " << scenes.size() << std::endl;
+                for (size_t i = 0; i < scenes.size(); ++i) {
+                    std::cout << "  [" << (i + 1) << "] " << scenes[i] << std::endl;
+                }
+            }
+        } catch (const std::exception& e) {
+            std::cout << "异常: " << e.what() << std::endl;
+        }
+    }
+
+    /**
+     * @brief 查看场景详情
+     */
+    void showSceneDetails() {
+        if (!isConnected()) {
+            std::cout << "请先连接到机器人。" << std::endl;
+            return;
+        }
+
+        std::string scene_name = inputSceneName();
+        if (scene_name.empty()) {
+            std::cout << "场景名称不能为空!" << std::endl;
+            return;
+        }
+
+        std::cout << "\n=== 场景详情: " << scene_name << " ===" << std::endl;
+
+        try {
+            auto details = map_manager->getScenesDetail(scene_name);
+            if (details.sub_scenes.empty()) {
+                std::cout << "场景 '" << scene_name << "' 不存在或没有子场景。" << std::endl;
+            } else {
+                std::cout << "子场景数量: " << details.sub_scenes.size() << std::endl;
+                for (const auto& sub_scene : details.sub_scenes) {
+                    std::cout << "\n  [子场景 ID: " << sub_scene.sub_scene_id << "]" << std::endl;
+                    std::cout << "    YAM 文件: " << sub_scene.yam_filename << std::endl;
+                    std::cout << "    PGM 文件: " << sub_scene.pgm_filename << std::endl;
+                }
+            }
+        } catch (const std::exception& e) {
+            std::cout << "异常: " << e.what() << std::endl;
+        }
+    }
+
+    /**
+     * @brief 删除场景
+     */
+    void deleteScene() {
+        if (!isConnected()) {
+            std::cout << "请先连接到机器人。" << std::endl;
+            return;
+        }
+
+        std::string scene_name = inputSceneName();
+        if (scene_name.empty()) {
+            std::cout << "场景名称不能为空!" << std::endl;
+            return;
+        }
+
+        std::cout << "\n=== 删除场景 ===" << std::endl;
+        std::cout << "确定要删除场景 '" << scene_name << "' 吗? (y/n): ";
+        char confirm;
+        std::cin >> confirm;
+        clearInputBuffer();
+
+        if (confirm != 'y' && confirm != 'Y') {
+            std::cout << "已取消删除。" << std::endl;
+            return;
+        }
+
+        try {
+            map_manager->deleteScene(scene_name);
+            std::this_thread::sleep_for(std::chrono::seconds(2));
+            std::cout << "场景删除指令已发送。" << std::endl;
+        } catch (const std::exception& e) {
+            std::cout << "异常: " << e.what() << std::endl;
+        }
+    }
+
+    /**
+     * @brief 删除所有场景
+     */
+    void deleteAllScenes() {
+        if (!isConnected()) {
+            std::cout << "请先连接到机器人。" << std::endl;
+            return;
+        }
+
+        std::cout << "\n=== 删除所有场景 ===" << std::endl;
+        std::cout << "警告: 此操作将删除所有场景!" << std::endl;
+        std::cout << "确定要继续吗? (y/n): ";
+        char confirm;
+        std::cin >> confirm;
+        clearInputBuffer();
+
+        if (confirm != 'y' && confirm != 'Y') {
+            std::cout << "已取消删除。" << std::endl;
+            return;
+        }
+
+        try {
+            map_manager->deleteAllScenes();
+            std::this_thread::sleep_for(std::chrono::seconds(2));
+            std::cout << "删除所有场景指令已发送。" << std::endl;
+        } catch (const std::exception& e) {
+            std::cout << "异常: " << e.what() << std::endl;
+        }
+    }
+
+    // ============ 地图管理功能 ============
+
+    /**
+     * @brief 下载地图
+     */
+    void downloadMap() {
+        if (!isConnected()) {
+            std::cout << "请先连接到机器人。" << std::endl;
+            return;
+        }
+
+        std::string scene_name = inputSceneName();
+        if (scene_name.empty()) {
+            std::cout << "场景名称不能为空!" << std::endl;
+            return;
+        }
+
+        std::string download_path = inputDownloadPath();
+
+        std::cout << "\n=== 下载地图 ===" << std::endl;
+        std::cout << "场景名称: " << scene_name << std::endl;
+        std::cout << "下载路径: " << download_path << std::endl;
+
+        try {
+            SceneDetail details = map_manager->getScenesDetail(scene_name);
+            if (!details.sub_scenes.size()) {
+                std::cout << "场景 '" << scene_name << "' 不存在或没有子场景。" << std::endl;
+                return;
+            }
+
+            map_manager->downloadMap(scene_name, details.sub_scenes[0].sub_scene_id, download_path, nullptr);
+            std::cout << "地图下载指令已发送，请等待下载完成..." << std::endl;
         } catch (const std::exception& e) {
             std::cout << "异常: " << e.what() << std::endl;
         }
@@ -586,10 +693,14 @@ public:
         std::cout << "  21. 开启定位" << std::endl;
         std::cout << "  22. 关闭定位" << std::endl;
         std::cout << "  23. 查看定位状态" << std::endl;
-        std::cout << "\n  --- 轨迹录制 ---" << std::endl;
-        std::cout << "  31. 开始轨迹录制" << std::endl;
-        std::cout << "  32. 添加路径点" << std::endl;
-        std::cout << "  33. 结束轨迹录制" << std::endl;
+        std::cout << "\n  --- 场景管理 ---" << std::endl;
+        std::cout << "  31. 刷新场景列表" << std::endl;
+        std::cout << "  32. 查看场景列表" << std::endl;
+        std::cout << "  33. 查看场景详情" << std::endl;
+        std::cout << "  34. 删除场景" << std::endl;
+        std::cout << "  35. 删除所有场景" << std::endl;
+        std::cout << "\n  --- 地图管理 ---" << std::endl;
+        std::cout << "  41. 下载地图 (YAM+PGM)" << std::endl;
         std::cout << "\n  0. 退出程序" << std::endl;
         std::cout << "========================================" << std::endl;
         std::cout << "请输入选项: ";
@@ -644,15 +755,26 @@ public:
                     showLocalizationStatus();
                     break;
 
-                // 轨迹录制
+                // 场景管理
                 case 31:
-                    startRecording();
+                    refreshScenesList();
                     break;
                 case 32:
-                    addPathPoint();
+                    showScenesList();
                     break;
                 case 33:
-                    finishRecording();
+                    showSceneDetails();
+                    break;
+                case 34:
+                    deleteScene();
+                    break;
+                case 35:
+                    deleteAllScenes();
+                    break;
+
+                // 地图管理
+                case 41:
+                    downloadMap();
                     break;
 
                 // 退出
@@ -687,7 +809,7 @@ int main() {
 
     std::cout << "Q25 SDK - 定位导航功能示例程序" << std::endl;
     std::cout << "Version 1.0.0" << std::endl;
-    std::cout << "本程序演示SLAM建图、定位、轨迹录制功能的交互式使用。" << std::endl;
+    std::cout << "本程序演示SLAM建图、定位、场景管理、地图管理功能的交互式使用。" << std::endl;
 
     MappingCLI cli;
     cli.run();
