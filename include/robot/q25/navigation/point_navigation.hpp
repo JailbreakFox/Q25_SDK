@@ -22,65 +22,14 @@ public:
     PointNavigation(const PointNavigation&) = delete;
     PointNavigation& operator=(const PointNavigation&) = delete;
 
-    // ============ 场景管理 ============
-
-    /**
-     * 获取所有场景列表
-     * @return 场景信息列表
-     */
-    std::vector<SceneInfo> getScenes();
-
-    /**
-     * 加载场景
-     * @param scene_id 场景ID
-     * @return true表示加载成功
-     */
-    bool loadScene(uint32_t scene_id);
-
-    /**
-     * 卸载当前场景
-     * @return true表示卸载成功
-     */
-    bool unloadScene();
-
-    /**
-     * 获取当前加载的场景ID
-     * @return 场景ID，如果未加载场景则返回0
-     */
-    uint32_t getCurrentSceneId() const;
-
-    /**
-     * 删除场景
-     * @param scene_id 场景ID
-     * @return true表示删除成功
-     */
-    bool deleteScene(uint32_t scene_id);
-
-    // ============ 导航点管理 ============
-
-    /**
-     * 更新导航点位姿
-     * @param point_id 导航点ID
-     * @param pose 新的位姿
-     * @return true表示更新成功
-     */
-    bool updateWayPoint(uint32_t point_id, const Pose& pose);
-
     // ============ 导航控制 ============
-
-    /**
-     * 导航到指定导航点
-     * @param point_id 导航点ID
-     * @return true表示导航任务启动成功
-     */
-    bool navigateToPoint(uint32_t point_id);
 
     /**
      * 导航到指定位姿
      * @param pose 目标位姿
      * @return true表示导航任务启动成功
      */
-    bool navigateToPose(const Pose& pose);
+    bool navigateToPose(const std::string& scene,const Pose& pose);
 
     /**
      * 取消当前导航
@@ -107,18 +56,6 @@ public:
      * @return 导航状态
      */
     NavigationStatus getNavigationStatus() const;
-
-    /**
-     * 获取当前目标点ID
-     * @return 目标点ID，无目标时返回0
-     */
-    uint32_t getCurrentTargetId() const;
-
-    /**
-     * 获取到目标点的距离
-     * @return 距离 (米)，无目标时返回-1
-     */
-    float getDistanceToTarget() const;
 
 private:
     struct Impl;
