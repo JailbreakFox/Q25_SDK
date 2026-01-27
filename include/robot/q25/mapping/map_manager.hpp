@@ -70,7 +70,7 @@ public:
 
     /**
      * 下载地图文件到本地
-     * SDK内部通过FTP下载YAM和PGM文件到指定目录
+     * SDK内部通过FTP下载YAM和地图文件到指定目录
      * @param scene_name 场景名称
      * @param sub_scene_id 子场景ID
      * @param save_dir 保存目录（绝对路径）
