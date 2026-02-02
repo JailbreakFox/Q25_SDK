@@ -239,6 +239,22 @@ public:
             return;
         }
 
+        // 检查是否已经在建图中
+        if (slam->isMapping()) {
+            std::cout << "\n警告：当前正在建图过程中！" << std::endl;
+            std::cout << "重新开始建图将终止当前建图场景，当前进度将丢失。" << std::endl;
+            std::cout << "确定要重新开始建图吗？(y/n): ";
+            char confirm;
+            std::cin >> confirm;
+            clearInputBuffer();
+
+            if (confirm != 'y' && confirm != 'Y') {
+                std::cout << "已取消重新建图，继续当前建图。" << std::endl;
+                return;
+            }
+            std::cout << "将终止当前建图并开始新的建图..." << std::endl;
+        }
+
         std::string scene_name;
         int scene_type;
 
@@ -384,7 +400,8 @@ public:
                 std::cout << "定位已开启! 场景名称: " << scene_name << std::endl;
             } else {
                 SLAMErrorCode error = slam->getErrorCode();
-                std::cout << "定位启动失败! 错误: " << getErrorCodeString(error) << std::endl;
+				if (error)
+					std::cout << "定位启动失败! 错误: " << getErrorCodeString(error) << std::endl;
             }
         } catch (const std::exception& e) {
             std::cout << "异常: " << e.what() << std::endl;
