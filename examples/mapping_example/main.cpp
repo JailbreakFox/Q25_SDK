@@ -190,42 +190,45 @@ public:
      * @brief 断开机器人连接
      */
     void disconnect() {
-        // 停止监控线程
-        if (monitor_thread) {
-            should_monitor = false;
-            if (monitor_thread->joinable()) {
-                monitor_thread->join();
-            }
-            delete monitor_thread;
-            monitor_thread = nullptr;
-        }
+		try {
+			// 停止监控线程
+			if (monitor_thread) {
+				should_monitor = false;
+				if (monitor_thread->joinable()) {
+					monitor_thread->join();
+				}
+				delete monitor_thread;
+				monitor_thread = nullptr;
+			}
 
-        {
-            std::lock_guard<std::mutex> lock(robot_mutex);
-            if (!connected && !robot) {
-                return;
-            }
+			{
+				std::lock_guard<std::mutex> lock(robot_mutex);
+				if (!connected && !robot) {
+					return;
+				}
 
-            if (robot) {
-                robot->disconnect();
-                delete robot;
-                robot = nullptr;
-            }
+				if (robot) {
+					robot->disconnect();
+					delete robot;
+					robot = nullptr;
+				}
 
-            connected = false;
-        }
+				connected = false;
+			}
 
-        // 断开连接时释放 SLAM 和 MapManager
-        if (slam) {
-            delete slam;
-            slam = nullptr;
-        }
-        if (map_manager) {
-            delete map_manager;
-            map_manager = nullptr;
-        }
+			// 断开连接时释放 SLAM 和 MapManager
+			if (slam) {
+				delete slam;
+				slam = nullptr;
+			}
+			if (map_manager) {
+				delete map_manager;
+				map_manager = nullptr;
+			}
 
-        std::cout << "已断开机器人连接。" << std::endl;
+			std::cout << "已断开机器人连接。" << std::endl;
+		} catch (const std::exception& e) {
+		}
     }
 
     // ============ 建图功能 ============
@@ -294,7 +297,8 @@ public:
                           << ", 场景类型: " << getSceneTypeString(type) << std::endl;
             } else {
                 SLAMErrorCode error = slam->getErrorCode();
-                std::cout << "建图启动失败! 错误: " << getErrorCodeString(error) << std::endl;
+				if (robot::q25::SLAMErrorCode::NORMAL != error)
+					std::cout << "建图启动失败! 错误: " << getErrorCodeString(error) << std::endl;
             }
         } catch (const std::exception& e) {
             std::cout << "异常: " << e.what() << std::endl;
@@ -400,7 +404,7 @@ public:
                 std::cout << "定位已开启! 场景名称: " << scene_name << std::endl;
             } else {
                 SLAMErrorCode error = slam->getErrorCode();
-				if (error)
+				if (robot::q25::SLAMErrorCode::NORMAL != error)
 					std::cout << "定位启动失败! 错误: " << getErrorCodeString(error) << std::endl;
             }
         } catch (const std::exception& e) {
@@ -677,7 +681,6 @@ public:
             map_manager->downloadMap(scene_name, details.sub_scenes[0].sub_scene_id, download_path, nullptr);
             std::cout << "地图下载指令已发送，请等待下载完成..." << std::endl;
         } catch (const std::exception& e) {
-            std::cout << "异常: " << e.what() << std::endl;
         }
     }
 
@@ -717,7 +720,7 @@ public:
         std::cout << "  34. 删除场景" << std::endl;
         std::cout << "  35. 删除所有场景" << std::endl;
         std::cout << "\n  --- 地图管理 ---" << std::endl;
-        std::cout << "  41. 下载地图 (YAM+PGM)" << std::endl;
+        std::cout << "  41. 下载地图" << std::endl;
         std::cout << "\n  0. 退出程序" << std::endl;
         std::cout << "========================================" << std::endl;
         std::cout << "请输入选项: ";
@@ -825,7 +828,7 @@ int main() {
 #endif
 
     std::cout << "Q25 SDK - 定位导航功能示例程序" << std::endl;
-    std::cout << "Version 1.0.0" << std::endl;
+    std::cout << "Version " << getSDKVersion() << std::endl;
     std::cout << "本程序演示SLAM建图、定位、场景管理、地图管理功能的交互式使用。" << std::endl;
 
     MappingCLI cli;
