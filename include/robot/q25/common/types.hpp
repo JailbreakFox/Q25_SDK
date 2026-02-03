@@ -212,7 +212,8 @@ enum class RecordCommand {
 enum class RecordResult {
     POINT_ADDED = 0,  // 添加点位成功
     SUCCESS = 1,      // 完成录制
-    FAIL = 2          // 录制失败
+    FAIL = 2,         // 录制失败
+    STARTING = 3      // 录制中
 };
 
 // 子场景信息

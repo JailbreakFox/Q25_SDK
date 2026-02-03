@@ -2,7 +2,7 @@ CXX = g++
 CXXFLAGS = -std=c++11 -O2 -I../../include
 LDFLAGS = -L../../lib/linux/x64 -lrobot_sdk -pthread -ldl
 
-TARGET = mapping_example
+TARGET = navigation_example
 SRC = main.cpp
 OBJ = $(SRC:.cpp=.o)
 

@@ -193,6 +193,9 @@ public:
                 } else if (result == RecordResult::FAIL) {
                     recording = false;
                     std::cout << "轨迹录制失败!" << std::endl;
+                } else if (result == RecordResult::STARTING) {
+                    recording = true;
+                    std::cout << "轨迹录制中!" << std::endl;
                 }
             });
 
@@ -548,6 +551,7 @@ public:
             case RecordResult::POINT_ADDED: return "路径点添加成功";
             case RecordResult::SUCCESS:      return "录制完成";
             case RecordResult::FAIL:         return "录制失败";
+			case RecordResult::STARTING:     return "录制中";
             default:                         return "未知";
         }
     }
@@ -805,7 +809,7 @@ public:
             slam->startRecording();
             recording = true;
             recording_scene_name = scene_name;
-            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+            std::this_thread::sleep_for(std::chrono::seconds(3));
 
             if (recording) {
                 std::cout << "轨迹录制已开始! 场景名称: " << scene_name << std::endl;
